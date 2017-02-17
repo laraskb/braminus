@@ -3,6 +3,7 @@
 require 'json'
 require './app/grid'
 require './app/a_star'
+require 'sinatra'
 
 # The real deal BattleSnake 2017
 class Braminus < Sinatra::Base
@@ -27,7 +28,10 @@ class Braminus < Sinatra::Base
   post '/move' do
     params = parse_post(request.body.read)
     food = params['food'].first
-    AStar.new([0, 0], food, @grid, find_obstacles(params['snake'])).search
+    grid = Grid.new(params['width'], params['height']) # in here for the tests
+    our_snake = params['you']
+    head = params['snakes'].find { |s| s['id'] == our_snake }['coords'].first
+    AStar.new(head, food, grid, find_obstacles(params['snakes'], head)).search
     { move: UP }.to_json
   end
 
@@ -37,12 +41,14 @@ class Braminus < Sinatra::Base
     JSON.parse(request)
   end
 
-  def find_obstacles(snakes)
+  def find_obstacles(snakes, head)
     all_occupied = []
     snakes.each do |s|
-      all_occupied.push(s.coords)
+      s['coords'].each do |c|
+        all_occupied.push(c) if c != head
+      end
     end
-    all_occupied.flatten
+    all_occupied.uniq
   end
 
   run! if app_file == $PROGRAM_NAME
