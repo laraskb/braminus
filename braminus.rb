@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require 'json'
-require 'sinatra/base'
 
 # The real deal BattleSnake 2017
 class Braminus < Sinatra::Base
