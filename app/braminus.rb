@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 
 require 'json'
+require './app/grid'
+require './app/a_star'
 
 # The real deal BattleSnake 2017
 class Braminus < Sinatra::Base
@@ -14,6 +16,8 @@ class Braminus < Sinatra::Base
   end
 
   post '/start' do
+    @game_id = params[:game_id]
+    @grid = Grid.new(params[:width], params[:height])
     { name: 'Braminus', color: '#8B008B' }.to_json
   end
 

@@ -3,11 +3,11 @@ require './app/node'
 
 # Implements the A* pathfinding algorithm
 class AStar
-  def initialize(origin, destination, grid)
-    @g = 0 # distance from origin
+  def initialize(origin, destination, grid, snakes)
     distance_to_destination = distance(origin, destination)
     @grid = grid
-    @open_set = [Node.new(origin, @g, distance_to_destination, @grid)]
+    @snakes = snakes
+    @open_set = [Node.new(origin, distance_to_destination, @grid, snakes)]
     @closed_set = []
     @origin = origin
     @destination = destination
@@ -46,7 +46,7 @@ class AStar
   def calculate_costs(neighbour, coords, current)
     h = distance(coords, @destination)
     if neighbour.nil? # we have not seen this node before
-      neighbour = Node.new(coords, current.g + 1, h, @grid, current)
+      neighbour = Node.new(coords, h, @grid, @snakes, current)
       @open_set.push(neighbour)
     elsif neighbour.f > ((current.g + 1) + h) # we have found a shorter path
       neighbour.f = (current.g + 1) + h
