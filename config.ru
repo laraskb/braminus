@@ -1,5 +1,5 @@
 require 'rubygems'
 require 'bundler'
 Bundler.require
-require './braminus'
+require './app/braminus'
 run Braminus
