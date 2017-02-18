@@ -27,4 +27,11 @@ describe 'A* algorithm' do
     grid = Grid.new(4, 4)
     expect(AStar.new([3, 2], [0, 1], grid, obstacle).search).to eq(final_path)
   end
+
+  it 'returns nil when there is no path' do
+    final_path = nil
+    obstacle = [[1, 0], [1, 1], [1, 2], [1, 3]]
+    grid = Grid.new(4, 4)
+    expect(AStar.new([3, 2], [0, 1], grid, obstacle).search).to eq(final_path)
+  end
 end
