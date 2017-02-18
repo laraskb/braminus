@@ -27,21 +27,28 @@ class Braminus < Sinatra::Base
 
   post '/move' do
     params = parse_post(request.body.read)
-    food = params['food'].first
     grid = Grid.new(params['width'], params['height']) # in here for the tests
+    food = params['food'].first
     our_snake = params['you']
     head = params['snakes'].find { |s| s['id'] == our_snake }['coords'].first
-    AStar.new(head, food, grid, find_obstacles(params['snakes'], head)).search
-    { move: UP }.to_json
+    path = AStar.new(head, food, grid, obstacles(params['snakes'], head)).search
+    { move: delta_direction(head, path[1]) }.to_json
   end
 
   private
+
+  # Should we return UP, DOWN, LEFT, or RIGHT
+  def delta_direction(head, next_node)
+    dx = head[0] - next_node[0]
+    return dx > 0 ? LEFT : RIGHT if dx.zero?
+    head[1] - next_node[1] > 0 ? DOWN : UP
+  end
 
   def parse_post(request)
     JSON.parse(request)
   end
 
-  def find_obstacles(snakes, head)
+  def obstacles(snakes, head)
     all_occupied = []
     snakes.each do |s|
       s['coords'].each do |c|

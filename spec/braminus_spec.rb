@@ -17,7 +17,7 @@ RSpec.describe Braminus do
   end
 
   it 'responds to post at /move' do
-    expected = { move: 'up' }.to_json
+    expected = { move: 'right' }.to_json
     path = File.expand_path('./spec/fixtures/move_parameters.json')
     post '/move', File.read(path)
     expect(last_response.body).to eq(expected)
