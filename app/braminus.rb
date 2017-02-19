@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'json'
+require './app/brain'
 require './app/grid'
 require './app/a_star'
 require 'sinatra'
@@ -16,14 +17,16 @@ class Braminus < Sinatra::Base
 
   def initialize(*)
     super
-    @@moves = Hash.new([])
+    @@brains = {}
     @@grids = {}
+    @@moves = Hash.new([])
   end
 
   post '/start' do
     params = parse_post(request.body.read)
     @@moves[params['game_id']] = []
     @@grids[params['game_id']] = Grid.new(params['width'], params['height'])
+    @@brains[params['game_id']] = Brain.new
     { name: SNAKE_NAME, color: COLOUR }.to_json
   end
 
@@ -54,15 +57,10 @@ class Braminus < Sinatra::Base
   def move_somewhere(head, obstacles)
     x = head[0]
     y = head[0]
-    if !obstacles.include?([x, y + 1])
-      return [x, y + 1]
-    elsif !obstacles.include?([x + 1, y])
-      return [x + 1, y]
-    elsif !obstacles.include?([x, y - 1])
-      return [x, y - 1]
-    else
-      return [x - 1, y]
-    end
+    return [x, y + 1] unless obstacles.include?([x, y + 1])
+    return [x + 1, y] unless obstacles.include?([x + 1, y])
+    return [x, y - 1] unless obstacles.include?([x, y - 1])
+    [x - 1, y]
   end
 
   # Should we return UP, DOWN, LEFT, or RIGHT
