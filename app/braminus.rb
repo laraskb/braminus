@@ -4,22 +4,22 @@ require 'json'
 require './app/brain'
 require './app/grid'
 require './app/a_star'
+require './helpers/braminus_helper'
 require 'sinatra'
 
 # The real deal BattleSnake 2017
 class Braminus < Sinatra::Base
+  include BraminusHelper
+
   SNAKE_NAME = 'Braminus'.freeze
   COLOUR = '#8B008B'.freeze
-  UP = 'up'.freeze
-  DOWN = 'down'.freeze
-  LEFT = 'left'.freeze
-  RIGHT = 'right'.freeze
 
   def initialize(*)
     super
     @@brains = {}
     @@grids = {}
     @@moves = Hash.new([])
+    @@our_lengths = {}
   end
 
   post '/start' do
@@ -27,6 +27,7 @@ class Braminus < Sinatra::Base
     @@moves[params['game_id']] = []
     @@grids[params['game_id']] = Grid.new(params['width'], params['height'])
     @@brains[params['game_id']] = Brain.new
+    @@our_lengths[params['game_id']] = 3
     { name: SNAKE_NAME, color: COLOUR }.to_json
   end
 
@@ -35,7 +36,11 @@ class Braminus < Sinatra::Base
     snake_id = params['you']
     game_id = params['game_id']
     head = @@moves[game_id].last || our_head(params['snakes'], snake_id)
-    dead_space, other_heads = obstacles_and_heads(params['snakes'], head)
+    snake_lengths = @@brains[game_id].snake_lengths(params['snakes'])
+    dead_space, other_heads = obstacles_and_heads(params['snakes'],
+                                                  head,
+                                                  @@our_lengths[game_id],
+                                                  snake_lengths)
     food = closest_to_food(params['food'], head, other_heads)
     move = next_move(snake_id, head, food, dead_space, params)
     { move: delta_direction(head, move) }.to_json
@@ -61,18 +66,6 @@ class Braminus < Sinatra::Base
     nil
   end
 
-  def our_head(snakes, us)
-    snakes.find { |s| s['id'] == us }['coords'].first
-  end
-
-  def our_tail(snakes, us)
-    snakes.find { |s| s['id'] == us }['coords'].last
-  end
-
-  def distance(a, b)
-    (a[0] - b[0]).abs + (a[1] - b[1]).abs
-  end
-
   def move_somewhere(head, obstacles)
     x = head[0]
     y = head[0]
@@ -82,27 +75,37 @@ class Braminus < Sinatra::Base
     [x - 1, y]
   end
 
-  # Should we return UP, DOWN, LEFT, or RIGHT
-  def delta_direction(head, next_node)
-    dx = head[0] - next_node[0]
-    return dx > 0 ? LEFT : RIGHT if dx.zero?
-    head[1] - next_node[1] > 0 ? DOWN : UP
+  # Array of possible locations a snake with a larger head could be next turn
+  def dangerous_snake_head(nodes, length, s, others)
+    possibles(nodes[0], nodes[1]) if others[s['id']] >= length
   end
 
-  def parse_post(request)
-    JSON.parse(request)
+  def possibles(snake_head, body)
+    x = snake_head[0]
+    y = snake_head[1]
+    dx = snake_head[0] - body[0]
+    dy = snake_head[1] - body[1]
+    possible_moves(x, y, dx, dy)
   end
 
-  def obstacles_and_heads(snakes, head)
-    all_occupied = []
+  def snake_bodies(nodes)
+    arr = []
+    nodes.drop(1).each do |c|
+      arr.push(c)
+    end
+  end
+
+  # others is their lengths
+  def obstacles_and_heads(snakes, head, length, others)
+    occupied = []
     other_heads = []
     snakes.each do |s|
-      other_heads.push(s['coords'].first) unless s['coords'].first == head
-      s['coords'].each do |c|
-        all_occupied.push(c) if c != head
-      end
+      nodes = s['coords']
+      other_heads.push(nodes.first) unless nodes.first == head
+      occupied.push(dangerous_snake_head(nodes, length, s, others))
+      occupied.push(snake_bodies(nodes))
     end
-    [all_occupied.uniq, other_heads]
+    [occupied.uniq, other_heads]
   end
 
   run! if app_file == $PROGRAM_NAME

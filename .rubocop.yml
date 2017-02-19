@@ -4,3 +4,9 @@ AllCops:
 
 Style/ClassVars:
   Enabled: false
+
+# Not particularly proud of it, but these are necessary for now...
+Metrics/MethodLength:
+  Max: 13
+Metrics/AbcSize:
+  Max: 17
