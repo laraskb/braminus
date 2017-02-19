@@ -32,19 +32,28 @@ class Braminus < Sinatra::Base
 
   post '/move' do
     params = parse_post(request.body.read)
-    id = params['game_id']
-    our_snake = params['you']
-    head = @@moves[id].last || our_head(params['snakes'], our_snake)
+    snake_id = params['you']
+    game_id = params['game_id']
+    head = @@moves[game_id].last || our_head(params['snakes'], snake_id)
     food = params['food'].first
     dead_space = obstacles(params['snakes'], head)
-    path = AStar.new(head, food, @@grids[id], dead_space).search
-    # Move towards the tail if there was no path
-    path = AStar.new(head, our_tail(params['snakes'], our_snake)) if path.nil?
-    next_move = path ? path[1] : move_somewhere(head, obstactles)
-    { move: delta_direction(head, next_move) }.to_json
+    move = next_move(snake_id, head, food, dead_space, params)
+    { move: delta_direction(head, move) }.to_json
   end
 
   private
+
+  def next_move(snake_id, head, food, dead_space, params)
+    # astar = AStar.new
+    game_id = params['game_id']
+    path = AStar.new(head, food, @@grids[game_id], dead_space).search
+    # Move towards the tail if there was no path
+    if path.nil?
+      tail = our_tail(params['snakes'], snake_id)
+      path = AStar.new(head, tail, @@grids[game_id], dead_space).search
+    end
+    path ? path[1] : move_somewhere(head, dead_space)
+  end
 
   def our_head(snakes, us)
     snakes.find { |s| s['id'] == us }['coords'].first
