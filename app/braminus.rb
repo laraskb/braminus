@@ -44,14 +44,10 @@ class Braminus < Sinatra::Base
   private
 
   def next_move(snake_id, head, food, dead_space, params)
-    # astar = AStar.new
     game_id = params['game_id']
-    path = AStar.new(head, food, @@grids[game_id], dead_space).search
-    # Move towards the tail if there was no path
-    if path.nil?
-      tail = our_tail(params['snakes'], snake_id)
-      path = AStar.new(head, tail, @@grids[game_id], dead_space).search
-    end
+    astar = AStar.new(@@grids[game_id], dead_space)
+    path = astar.search(head, food)
+    path = astar.search(head, our_tail(params['snakes'], snake_id)) if path.nil?
     path ? path[1] : move_somewhere(head, dead_space)
   end
 

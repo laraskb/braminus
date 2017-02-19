@@ -3,19 +3,25 @@ require './app/node'
 
 # Implements the A* pathfinding algorithm
 class AStar
-  def initialize(origin, destination, grid, snakes)
-    distance_to_destination = distance(origin, destination)
+  def initialize(grid, snakes)
     @grid = grid
     @snakes = snakes
-    @open_set = [Node.new(origin, distance_to_destination, @grid, snakes)]
-    @closed_set = []
-    @origin = origin
-    @destination = destination
   end
 
   # The A* search function
   # => All spaces occupied by snakes are considered obstacles
-  def search
+  def search(origin, destination)
+    distance_to_destination = distance(origin, destination)
+    @open_set = [Node.new(origin, distance_to_destination, @grid, @snakes)]
+    @closed_set = []
+    @origin = origin
+    @destination = destination
+    perform_astar
+  end
+
+  private
+
+  def perform_astar
     until @open_set.empty?
       current = @open_set.min_by(&:f) # get node with the smallest f cost
       @open_set.delete(current)
@@ -24,8 +30,6 @@ class AStar
       update_neighbours(current)
     end
   end
-
-  private
 
   # Distance (dx + dy) between two points
   def distance(a, b)
