@@ -30,17 +30,39 @@ class Braminus < Sinatra::Base
   post '/move' do
     params = parse_post(request.body.read)
     id = params['game_id']
-    head = @@moves[id].last || get_head(params['snakes'], params['you'])
+    our_snake = params['you']
+    head = @@moves[id].last || our_head(params['snakes'], our_snake)
     food = params['food'].first
     dead_space = obstacles(params['snakes'], head)
     path = AStar.new(head, food, @@grids[id], dead_space).search
-    { move: delta_direction(head, path[1]) }.to_json
+    # Move towards the tail if there was no path
+    path = AStar.new(head, our_tail(params['snakes'], our_snake)) if path.nil?
+    next_move = path ? path[1] : move_somewhere(head, obstactles)
+    { move: delta_direction(head, next_move) }.to_json
   end
 
   private
 
-  def get_head(snakes, us)
+  def our_head(snakes, us)
     snakes.find { |s| s['id'] == us }['coords'].first
+  end
+
+  def our_tail(snakes, us)
+    snakes.find { |s| s['id'] == us }['coords'].last
+  end
+
+  def move_somewhere(head, obstacles)
+    x = head[0]
+    y = head[0]
+    if !obstacles.include?([x, y + 1])
+      return [x, y + 1]
+    elsif !obstacles.include?([x + 1, y])
+      return [x + 1, y]
+    elsif !obstacles.include?([x, y - 1])
+      return [x, y - 1]
+    else
+      return [x - 1, y]
+    end
   end
 
   # Should we return UP, DOWN, LEFT, or RIGHT
