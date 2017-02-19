@@ -22,4 +22,11 @@ RSpec.describe Braminus do
     post '/move', fixture('./spec/fixtures/move_parameters.json')
     expect(last_response.body).to eq(expected)
   end
+
+  it 'moves towards tail when a different snake is closer to food' do
+    expected = { move: 'right' }.to_json
+    post '/start', { width: 20, height: 20, game_id: 'b1d-a112-4e0e' }.to_json
+    post '/move', fixture('./spec/fixtures/move_parameters_others.json')
+    expect(last_response.body).to eq(expected)
+  end
 end

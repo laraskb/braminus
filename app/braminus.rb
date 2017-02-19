@@ -35,8 +35,8 @@ class Braminus < Sinatra::Base
     snake_id = params['you']
     game_id = params['game_id']
     head = @@moves[game_id].last || our_head(params['snakes'], snake_id)
-    food = params['food'].first
-    dead_space = obstacles(params['snakes'], head)
+    dead_space, other_heads = obstacles_and_heads(params['snakes'], head)
+    food = closest_to_food(params['food'], head, other_heads)
     move = next_move(snake_id, head, food, dead_space, params)
     { move: delta_direction(head, move) }.to_json
   end
@@ -51,12 +51,26 @@ class Braminus < Sinatra::Base
     path ? path[1] : move_somewhere(head, dead_space)
   end
 
+  def closest_to_food(food, our_head, other_heads)
+    return food.first if other_heads.nil?
+    food.each do |dot|
+      our_distance = distance(dot, our_head)
+      their_delta = other_heads.collect { |e| distance(dot, e) }
+      return dot if their_delta.empty? || (our_distance < their_delta.sort.min)
+    end
+    nil
+  end
+
   def our_head(snakes, us)
     snakes.find { |s| s['id'] == us }['coords'].first
   end
 
   def our_tail(snakes, us)
     snakes.find { |s| s['id'] == us }['coords'].last
+  end
+
+  def distance(a, b)
+    (a[0] - b[0]).abs + (a[1] - b[1]).abs
   end
 
   def move_somewhere(head, obstacles)
@@ -79,14 +93,16 @@ class Braminus < Sinatra::Base
     JSON.parse(request)
   end
 
-  def obstacles(snakes, head)
+  def obstacles_and_heads(snakes, head)
     all_occupied = []
+    other_heads = []
     snakes.each do |s|
+      other_heads.push(s['coords'].first) unless s['coords'].first == head
       s['coords'].each do |c|
         all_occupied.push(c) if c != head
       end
     end
-    all_occupied.uniq
+    [all_occupied.uniq, other_heads]
   end
 
   run! if app_file == $PROGRAM_NAME

@@ -11,6 +11,7 @@ class AStar
   # The A* search function
   # => All spaces occupied by snakes are considered obstacles
   def search(origin, destination)
+    return nil if destination.nil?
     distance_to_destination = distance(origin, destination)
     @open_set = [Node.new(origin, distance_to_destination, @grid, @snakes)]
     @closed_set = []
@@ -33,7 +34,7 @@ class AStar
 
   # Distance (dx + dy) between two points
   def distance(a, b)
-    (a[0] + b[0]).abs + (a[1] + b[1]).abs
+    (a[0] - b[0]).abs + (a[1] - b[1]).abs
   end
 
   # Array of coordinates showing the final path
