@@ -16,26 +16,32 @@ class Braminus < Sinatra::Base
 
   def initialize(*)
     super
+    @@moves = Hash.new([])
+    @@grids = {}
   end
 
   post '/start' do
     params = parse_post(request.body.read)
-    @game_id = params['game_id']
-    @grid = Grid.new(params['width'], params['height'])
+    @@moves[params['game_id']] = []
+    @@grids[params['game_id']] = Grid.new(params['width'], params['height'])
     { name: SNAKE_NAME, color: COLOUR }.to_json
   end
 
   post '/move' do
     params = parse_post(request.body.read)
-    grid = Grid.new(params['width'], params['height']) # in here for the tests
+    id = params['game_id']
+    head = @@moves[id].last || get_head(params['snakes'], params['you'])
     food = params['food'].first
-    our_snake = params['you']
-    head = params['snakes'].find { |s| s['id'] == our_snake }['coords'].first
-    path = AStar.new(head, food, grid, obstacles(params['snakes'], head)).search
+    dead_space = obstacles(params['snakes'], head)
+    path = AStar.new(head, food, @@grids[id], dead_space).search
     { move: delta_direction(head, path[1]) }.to_json
   end
 
   private
+
+  def get_head(snakes, us)
+    snakes.find { |s| s['id'] == us }['coords'].first
+  end
 
   # Should we return UP, DOWN, LEFT, or RIGHT
   def delta_direction(head, next_node)

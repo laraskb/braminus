@@ -1,0 +1,6 @@
+AllCops:
+  Exclude:
+    - 'test_braminus.rb'
+
+Style/ClassVars:
+  Enabled: false
