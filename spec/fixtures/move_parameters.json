@@ -1,6 +1,6 @@
 {
   "you": "25229082-f0d7-4315-8c52-6b0ff23fb1fb",
-  "width": 2,
+  "width": 4,
   "turn": 0,
   "snakes": [
     {
@@ -10,26 +10,26 @@
       "health_points": 93,
       "coords": [
         [
-          0,
-          0
+          1,
+          2
         ],
         [
-          0,
-          0
+          1,
+          1
         ],
         [
-          0,
+          1,
           0
         ]
       ]
     }
   ],
-  "height": 2,
+  "height": 4,
   "game_id": "b1d-a112-4e0e",
   "food": [
     [
-      1,
-      1
+      2,
+      2
     ]
   ],
   "dead_snakes": [

@@ -8,7 +8,7 @@ module BraminusHelper
   # Should we move UP, DOWN, LEFT, or RIGHT
   def delta_direction(head, next_node)
     dx = head[0] - next_node[0]
-    return dx > 0 ? LEFT : RIGHT if dx.zero?
+    return dx > 0 ? LEFT : RIGHT unless dx.zero?
     head[1] - next_node[1] > 0 ? DOWN : UP
   end
 
@@ -30,18 +30,9 @@ module BraminusHelper
 
   # Given a snakes head and body positions, where could it move
   def possible_moves(x, y, dx, dy)
-    arr = []
-    arr.push(
-      if dx > 0
-        [[x - 1, y], [x, y + 1], [x, y - 1]]
-      elsif dx < 0
-        [[x + 1, y], [x, y + 1], [x, y - 1]]
-      elsif dy > 0
-        [[x + 1, y], [x, y + 1], [x - 1, y]]
-      else
-        [[x + 1, y], [x, y - 1], [x - 1, y]]
-      end
-    )
-    arr
+    return [[x - 1, y], [x, y + 1], [x, y - 1]] if dx > 0
+    return [[x + 1, y], [x, y + 1], [x, y - 1]] if dx < 0
+    return [[x + 1, y], [x, y + 1], [x - 1, y]] if dy > 0
+    [[x + 1, y], [x, y - 1], [x - 1, y]]
   end
 end

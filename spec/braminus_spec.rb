@@ -32,4 +32,12 @@ RSpec.describe Braminus do
     within_limit(post('/move', fixture(filename)))
     expect(last_response.body).to eq(expected)
   end
+
+  it 'moves towards tail when a longer snake could cut us off' do
+    expected = { move: 'left' }.to_json
+    post '/start', { width: 4, height: 5, game_id: 'b1d-a112-4e0e' }.to_json
+    filename = './spec/fixtures/move_longer_snake_head.json'
+    within_limit(post('/move', fixture(filename)))
+    expect(last_response.body).to eq(expected)
+  end
 end

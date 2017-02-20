@@ -68,7 +68,7 @@ class Braminus < Sinatra::Base
 
   def move_somewhere(head, obstacles)
     x = head[0]
-    y = head[0]
+    y = head[1]
     return [x, y + 1] unless obstacles.include?([x, y + 1])
     return [x + 1, y] unless obstacles.include?([x + 1, y])
     return [x, y - 1] unless obstacles.include?([x, y - 1])
@@ -88,11 +88,13 @@ class Braminus < Sinatra::Base
     possible_moves(x, y, dx, dy)
   end
 
-  def snake_bodies(nodes)
+  def snake_bodies(head, nodes)
     arr = []
     nodes.drop(1).each do |c|
       arr.push(c)
     end
+    return arr[0..-2] if nodes[0] == head
+    arr
   end
 
   # others is their lengths
@@ -101,11 +103,13 @@ class Braminus < Sinatra::Base
     other_heads = []
     snakes.each do |s|
       nodes = s['coords']
-      other_heads.push(nodes.first) unless nodes.first == head
-      occupied.push(dangerous_snake_head(nodes, length, s, others))
-      occupied.push(snake_bodies(nodes))
+      unless nodes.first == head
+        other_heads.push(nodes.first)
+        occupied += dangerous_snake_head(nodes, length, s, others)
+      end
+      occupied += snake_bodies(head, nodes)
     end
-    [occupied.uniq, other_heads]
+    [occupied, other_heads]
   end
 
   run! if app_file == $PROGRAM_NAME
