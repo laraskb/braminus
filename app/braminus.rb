@@ -44,6 +44,7 @@ class Braminus < Sinatra::Base
     food = closest_to_food(params['food'], head, other_heads)
     move = next_move(snake_id, head, food, dead_space, params)
     @@moves[game_id].push(move)
+    @@our_lengths[game_id] += 1 if food == move # ASSUME that we will eat it
     { move: delta_direction(head, move) }.to_json
   end
 
