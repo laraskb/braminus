@@ -43,6 +43,7 @@ class Braminus < Sinatra::Base
                                                   snake_lengths)
     food = closest_to_food(params['food'], head, other_heads)
     move = next_move(snake_id, head, food, dead_space, params)
+    @@moves[game_id].push(move)
     { move: delta_direction(head, move) }.to_json
   end
 
