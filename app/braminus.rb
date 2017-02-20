@@ -58,7 +58,7 @@ class Braminus < Sinatra::Base
   end
 
   def closest_to_food(food, our_head, other_heads)
-    return food.first if other_heads.nil?
+    return food.first if other_heads.nil? # for test cases
     food.each do |dot|
       our_distance = distance(dot, our_head)
       their_delta = other_heads.collect { |e| distance(dot, e) }
@@ -81,32 +81,23 @@ class Braminus < Sinatra::Base
     possibles(nodes[0], nodes[1]) if others[s['id']] >= length
   end
 
-  def possibles(snake_head, body)
-    x = snake_head[0]
-    y = snake_head[1]
-    dx = snake_head[0] - body[0]
-    dy = snake_head[1] - body[1]
-    possible_moves(x, y, dx, dy)
-  end
-
   def snake_bodies(head, nodes)
     arr = []
     nodes.drop(1).each do |c|
       arr.push(c)
     end
-    return arr[0..-2] if nodes[0] == head
+    return arr[0..-2] if nodes[0] == head # our tail needs to be 'safe'
     arr
   end
 
-  # others is their lengths
-  def obstacles_and_heads(snakes, head, length, others)
+  def obstacles_and_heads(snakes, head, length, other_lengths)
     occupied = []
     other_heads = []
     snakes.each do |s|
       nodes = s['coords']
       unless nodes.first == head
         other_heads.push(nodes.first)
-        occupied += dangerous_snake_head(nodes, length, s, others)
+        occupied += dangerous_snake_head(nodes, length, s, other_lengths)
       end
       occupied += snake_bodies(head, nodes)
     end

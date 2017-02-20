@@ -9,7 +9,7 @@ class AStar
   end
 
   # The A* search function
-  # => All spaces occupied by snakes are considered obstacles
+  # Spaces occupied by snakes, or their possible head movements, are obstacles
   def search(origin, destination)
     return nil if destination.nil?
     distance_to_destination = distance(origin, destination)
@@ -43,7 +43,7 @@ class AStar
     loop do
       node = node.parent
       path.push(node.coords)
-      return path.reverse if node.parent.nil? # Origin node has nil parent
+      return path.reverse if node.parent.nil? # origin node has nil parent
     end
   end
 

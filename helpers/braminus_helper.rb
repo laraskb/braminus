@@ -28,6 +28,14 @@ module BraminusHelper
     JSON.parse(request)
   end
 
+  def possibles(snake_head, body)
+    x = snake_head[0]
+    y = snake_head[1]
+    dx = snake_head[0] - body[0]
+    dy = snake_head[1] - body[1]
+    possible_moves(x, y, dx, dy)
+  end
+
   # Given a snakes head and body positions, where could it move
   def possible_moves(x, y, dx, dy)
     return [[x - 1, y], [x, y + 1], [x, y - 1]] if dx > 0

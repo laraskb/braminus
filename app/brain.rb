@@ -1,8 +1,5 @@
 # How Braminus gets her smarts
 class Brain
-  def initialize
-  end
-
   def snake_lengths(snakes)
     snake_lengths = {}
     snakes.each do |s|

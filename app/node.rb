@@ -17,7 +17,7 @@ class Node
       (coords[0] < @grid.width && coords[1] < @grid.height)
   end
 
-  # Returns array of possible neighbours (excludes obstacles)
+  # Array of possible neighbours (excludes obstacles)
   def find_neighbours(snakes)
     x = @coords[0]
     y = @coords[1]
