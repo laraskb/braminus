@@ -20,6 +20,10 @@ module BraminusHelper
     snakes.find { |s| s['id'] == us }['coords'].last
   end
 
+  def our_health(snakes, us)
+    snakes.find { |s| s['id'] == us }['health_points']
+  end
+
   def distance(a, b)
     (a[0] - b[0]).abs + (a[1] - b[1]).abs
   end
