@@ -1,5 +1,5 @@
 require 'spec_helper'
-require './app/brain'
+require_relative '../classes/brain'
 require 'json'
 
 describe "Braminus' Brain" do

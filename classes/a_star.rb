@@ -1,5 +1,5 @@
-require './app/grid'
-require './app/node'
+require_relative 'grid'
+require_relative 'node'
 
 # Implements the A* pathfinding algorithm
 class AStar

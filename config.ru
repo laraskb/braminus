@@ -1,5 +1,8 @@
+$stdout.sync = true # enables printing to the console
+
 require 'rubygems'
 require 'bundler'
 Bundler.require
-require './app/braminus'
-run Braminus
+
+require './web.rb'
+run Sinatra::Application

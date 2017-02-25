@@ -1,6 +1,6 @@
 require 'spec_helper'
-require './app/grid'
-require './app/a_star'
+require_relative '../classes/grid'
+require_relative '../classes/a_star'
 
 describe 'A* algorithm' do
   it 'finds a simple path with no obstacles' do

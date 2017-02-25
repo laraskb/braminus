@@ -1,14 +1,14 @@
 require 'benchmark'
 require 'spec_helper'
 require 'rack/test'
-require './app/braminus'
+require_relative '../web'
 require 'json'
 
-RSpec.describe Braminus do
+RSpec.describe 'Braminus' do
   include Rack::Test::Methods
 
   def app
-    Braminus
+    Sinatra::Application
   end
 
   it 'responds to post at /start' do
@@ -42,7 +42,7 @@ RSpec.describe Braminus do
   end
 
   it 'will not go at food if we would enter a deadend' do
-    expected = { move: 'up' }.to_json
+    expected = { move: 'down' }.to_json
     post '/start', { width: 4, height: 4, game_id: 'b1d-a112-4e0e' }.to_json
     filename = './spec/fixtures/no_escape.json'
     within_limit(post('/move', fixture(filename)))
