@@ -12,6 +12,17 @@ class Snake
     @length = @body.length # Bad OO?
   end
 
+  # After a move, this is what the body would be
+  def possible_body(path)
+    if @length > path.length
+      @body[0...-1].last(@length - path.length) + path
+    elsif @length < path.length
+      path.last(@length)
+    else
+      path
+    end
+  end
+
   private
 
   # The JSON representing the snake

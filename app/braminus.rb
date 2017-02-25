@@ -58,8 +58,20 @@ class Braminus < Sinatra::Base
     game_id = params['game_id']
     astar = AStar.new(@@grids[game_id], dead_space)
     path = astar.search(bram.head, food)
-    path = astar.search(bram.head, bram.tail) if path.nil?
+    if path.nil?
+      # No path to food, move to the tail
+      path = astar.search(bram.head, bram.tail)
+    elsif path_is_deadend?(bram, path, astar)
+      # Don't move into a deadend to get to the food
+      path = nil
+    end
+    # Possibly need another check to make sure this doesn't deadend
     path ? path[1] : move_somewhere(bram.head, dead_space)
+  end
+
+  def path_is_deadend?(bram, path, astar)
+    body = bram.possible_body(path)
+    astar.search(body.first, body.last).nil?
   end
 
   def closest_to_food(food, our_head, other_heads)
@@ -74,7 +86,7 @@ class Braminus < Sinatra::Base
 
   # Array of possible locations a snake with a larger head could be next turn
   def dangerous_snake_head(nodes, length, their_length)
-    possibles(nodes[0], nodes[1]) if their_length >= length
+    their_length >= length ? possibles(nodes[0], nodes[1]) : []
   end
 
   def obstacles_and_heads(others, bram)

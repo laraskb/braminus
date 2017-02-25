@@ -20,7 +20,7 @@ RSpec.describe Braminus do
 
   it 'responds to post at /move' do
     expected = { move: 'right' }.to_json
-    post '/start', { width: 20, height: 20, game_id: 'b1d-a112-4e0e' }.to_json
+    post '/start', { width: 4, height: 4, game_id: 'b1d-a112-4e0e' }.to_json
     within_limit(post('/move', fixture('./spec/fixtures/move_parameters.json')))
     expect(last_response.body).to eq(expected)
   end
@@ -37,6 +37,14 @@ RSpec.describe Braminus do
     expected = { move: 'left' }.to_json
     post '/start', { width: 4, height: 5, game_id: 'b1d-a112-4e0e' }.to_json
     filename = './spec/fixtures/move_longer_snake_head.json'
+    within_limit(post('/move', fixture(filename)))
+    expect(last_response.body).to eq(expected)
+  end
+
+  it 'will not go at food if we would enter a deadend' do
+    expected = { move: 'up' }.to_json
+    post '/start', { width: 4, height: 4, game_id: 'b1d-a112-4e0e' }.to_json
+    filename = './spec/fixtures/no_escape.json'
     within_limit(post('/move', fixture(filename)))
     expect(last_response.body).to eq(expected)
   end
