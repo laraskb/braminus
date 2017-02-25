@@ -12,18 +12,6 @@ module BraminusHelper
     head[1] - next_node[1] > 0 ? DOWN : UP
   end
 
-  def our_head(snakes, us)
-    snakes.find { |s| s['id'] == us }['coords'].first
-  end
-
-  def our_tail(snakes, us)
-    snakes.find { |s| s['id'] == us }['coords'].last
-  end
-
-  def our_health(snakes, us)
-    snakes.find { |s| s['id'] == us }['health_points']
-  end
-
   def distance(a, b)
     (a[0] - b[0]).abs + (a[1] - b[1]).abs
   end
@@ -46,5 +34,15 @@ module BraminusHelper
     return [[x + 1, y], [x, y + 1], [x, y - 1]] if dx < 0
     return [[x + 1, y], [x, y + 1], [x - 1, y]] if dy > 0
     [[x + 1, y], [x, y - 1], [x - 1, y]]
+  end
+
+  # Just don't move into a wall
+  def move_somewhere(head, obstacles)
+    x = head[0]
+    y = head[1]
+    return [x, y + 1] unless obstacles.include?([x, y + 1])
+    return [x + 1, y] unless obstacles.include?([x + 1, y])
+    return [x, y - 1] unless obstacles.include?([x, y - 1])
+    [x - 1, y]
   end
 end

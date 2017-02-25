@@ -3,6 +3,7 @@
 require 'json'
 require './app/brain'
 require './app/grid'
+require './app/snake'
 require './app/a_star'
 require './helpers/braminus_helper'
 require 'sinatra'
@@ -27,35 +28,38 @@ class Braminus < Sinatra::Base
     @@moves[params['game_id']] = []
     @@grids[params['game_id']] = Grid.new(params['width'], params['height'])
     @@brains[params['game_id']] = Brain.new
-    @@our_lengths[params['game_id']] = 3
     { name: SNAKE_NAME, color: COLOUR }.to_json
   end
 
   post '/move' do
     params = parse_post(request.body.read)
-    snake_id = params['you']
     game_id = params['game_id']
-    head = @@moves[game_id].last || our_head(params['snakes'], snake_id)
-    snake_lengths = @@brains[game_id].snake_lengths(params['snakes'])
-    dead_space, other_heads = obstacles_and_heads(params['snakes'],
-                                                  head,
-                                                  @@our_lengths[game_id],
-                                                  snake_lengths)
-    food = closest_to_food(params['food'], head, other_heads)
-    move = next_move(snake_id, head, food, dead_space, params)
+    bram = Snake.new(params['you'], params['snakes'])
+    others = other_snakes(bram.id, params['snakes'])
+    # This is where the brain should check whether one snake is getting too good
+    dead_space, other_heads = obstacles_and_heads(others, bram)
+    food = closest_to_food(params['food'], bram.head, other_heads)
+    move = next_move(bram, food, dead_space, params)
     @@moves[game_id].push(move)
-    @@our_lengths[game_id] += 1 if food == move # ASSUME that we will eat it
-    { move: delta_direction(head, move) }.to_json
+    { move: delta_direction(bram.head, move) }.to_json
   end
 
   private
 
-  def next_move(snake_id, head, food, dead_space, params)
+  def other_snakes(our_id, snakes)
+    adversaries = []
+    snakes.each do |s|
+      adversaries.push(Snake.new(s['id'], snakes)) unless s['id'] == our_id
+    end
+    adversaries
+  end
+
+  def next_move(bram, food, dead_space, params)
     game_id = params['game_id']
     astar = AStar.new(@@grids[game_id], dead_space)
-    path = astar.search(head, food)
-    path = astar.search(head, our_tail(params['snakes'], snake_id)) if path.nil?
-    path ? path[1] : move_somewhere(head, dead_space)
+    path = astar.search(bram.head, food)
+    path = astar.search(bram.head, bram.tail) if path.nil?
+    path ? path[1] : move_somewhere(bram.head, dead_space)
   end
 
   def closest_to_food(food, our_head, other_heads)
@@ -68,40 +72,20 @@ class Braminus < Sinatra::Base
     nil
   end
 
-  def move_somewhere(head, obstacles)
-    x = head[0]
-    y = head[1]
-    return [x, y + 1] unless obstacles.include?([x, y + 1])
-    return [x + 1, y] unless obstacles.include?([x + 1, y])
-    return [x, y - 1] unless obstacles.include?([x, y - 1])
-    [x - 1, y]
-  end
-
   # Array of possible locations a snake with a larger head could be next turn
-  def dangerous_snake_head(nodes, length, s, others)
-    possibles(nodes[0], nodes[1]) if others[s['id']] >= length
+  def dangerous_snake_head(nodes, length, their_length)
+    possibles(nodes[0], nodes[1]) if their_length >= length
   end
 
-  def snake_bodies(head, nodes)
-    arr = []
-    nodes.drop(1).each do |c|
-      arr.push(c)
-    end
-    return arr[0..-2] if nodes[0] == head # our tail needs to be 'safe'
-    arr
-  end
-
-  def obstacles_and_heads(snakes, head, length, other_lengths)
+  def obstacles_and_heads(others, bram)
     occupied = []
     other_heads = []
-    snakes.each do |s|
-      nodes = s['coords']
-      unless nodes.first == head
-        other_heads.push(nodes.first)
-        occupied += dangerous_snake_head(nodes, length, s, other_lengths)
-      end
-      occupied += snake_bodies(head, nodes)
+    others.each do |s|
+      occupied += dangerous_snake_head(s.body, bram.length, s.length)
+      other_heads.push(s.head)
+      occupied += s.body.drop(1)
     end
+    occupied += bram.body[0...-1]
     [occupied, other_heads]
   end
 
