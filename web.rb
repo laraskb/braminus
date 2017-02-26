@@ -43,7 +43,7 @@ def next_move(bram, food, dead_space, params)
   if path.nil?
     # No path to food, move to the tail
     path = astar.search(bram.head, bram.tail)
-  elsif path_is_deadend?(bram, path, astar)
+  elsif path_is_deadend?(bram, path, astar, dead_space)
     # Don't move into a deadend to get to the food
     path = nil
   end
@@ -51,9 +51,15 @@ def next_move(bram, food, dead_space, params)
   path ? path[1] : move_somewhere(bram.head, dead_space)
 end
 
-def path_is_deadend?(bram, path, astar)
+def path_is_deadend?(bram, path, astar, dead_space)
   body = bram.possible_body(path)
-  astar.search(body.first, body.last).nil?
+  # Forget about our old body
+  new_dead_space = update_deadspace(bram.body, body, dead_space)
+  astar.search(body.first, body.last, new_dead_space).nil?
+end
+
+def update_deadspace(actual, possible, dead_space)
+  dead_space - (actual[0...-1] - possible[0...-1])
 end
 
 def closest_to_food(food, our_head, other_heads)

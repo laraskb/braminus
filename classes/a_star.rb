@@ -10,8 +10,9 @@ class AStar
 
   # The A* search function
   # Spaces occupied by snakes, or their possible head movements, are obstacles
-  def search(origin, destination)
+  def search(origin, destination, dead_space = nil)
     return nil if destination.nil?
+    @snakes = dead_space.nil? ? @snakes : dead_space
     distance_to_destination = distance(origin, destination)
     @open_set = [Node.new(origin, distance_to_destination, @grid, @snakes)]
     @closed_set = []
