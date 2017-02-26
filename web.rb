@@ -48,7 +48,7 @@ def next_move(bram, food, dead_space, params)
     path = nil
   end
   # Possibly need another check to make sure this doesn't deadend
-  path ? path[1] : move_somewhere(bram.head, dead_space)
+  path ? path[1] : move_somewhere(bram, dead_space, astar)
 end
 
 def path_is_deadend?(bram, path, astar, dead_space)
@@ -69,11 +69,10 @@ def closest_to_food(food, our_head, other_heads)
   food.each do |dot|
     our_distance = distance(dot, our_head)
     their_delta = other_heads.collect { |e| distance(dot, e) }
-    if (their_delta.empty? || (our_distance < their_delta.sort.min)) &&
-       our_distance < closest
-      closest = our_distance
-      desired = dot
-    end
+    next unless (their_delta.empty? || (our_distance < their_delta.sort.min)) &&
+                (our_distance < closest)
+    closest = our_distance
+    desired = dot
   end
   desired.nil? ? nil : desired
 end
@@ -122,12 +121,16 @@ def possible_moves(x, y, dx, dy)
   [[x + 1, y], [x, y - 1], [x - 1, y]]
 end
 
-# Just don't move into a wall
-def move_somewhere(head, obstacles)
-  x = head[0]
-  y = head[1]
-  return [x, y + 1] unless obstacles.include?([x, y + 1])
-  return [x + 1, y] unless obstacles.include?([x + 1, y])
-  return [x, y - 1] unless obstacles.include?([x, y - 1])
-  [x - 1, y]
+# Just don't move into a wall or box yourself in
+def move_somewhere(bram, dead_space, astar)
+  x = bram.head[0]
+  y = bram.head[1]
+  open_spot = []
+  possible = [[x, y + 1], [x + 1, y], [x, y - 1], [x - 1, y]]
+  possible.reject { |a, b| a.negative? || b.negative? }.each do |c|
+    next if dead_space.include?(c) # do not under any circumstances move there
+    open_spot.push(c)
+    return c unless path_is_deadend?(bram, [bram.head, c], astar, dead_space)
+  end
+  open_spot.first # all are dead-ends so just pick an open spot
 end
