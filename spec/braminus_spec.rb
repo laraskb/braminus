@@ -41,10 +41,18 @@ RSpec.describe 'Braminus' do
     expect(last_response.body).to eq(expected)
   end
 
-  it 'will not go at food if we would enter a deadend' do
-    expected = { move: 'down' }.to_json
+  it 'will not go at food if we would enter a dead-end' do
+    expected = { move: 'down' }.to_json # TODO: wrong
     post '/start', { width: 4, height: 4, game_id: 'b1d-a112-4e0e' }.to_json
     filename = './spec/fixtures/no_escape.json'
+    within_limit(post('/move', fixture(filename)))
+    expect(last_response.body).to eq(expected)
+  end
+
+  it 'chooses the closest food' do
+    expected = { move: 'down' }.to_json
+    post '/start', { width: 4, height: 4, game_id: 'b1d-a112-4e0e' }.to_json
+    filename = './spec/fixtures/closest_food.json'
     within_limit(post('/move', fixture(filename)))
     expect(last_response.body).to eq(expected)
   end

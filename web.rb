@@ -58,12 +58,18 @@ end
 
 def closest_to_food(food, our_head, other_heads)
   return food.first if other_heads.nil? # for test cases
+  closest = 9999 # not "correct" obviously
+  desired = nil
   food.each do |dot|
     our_distance = distance(dot, our_head)
     their_delta = other_heads.collect { |e| distance(dot, e) }
-    return dot if their_delta.empty? || (our_distance < their_delta.sort.min)
+    if (their_delta.empty? || (our_distance < their_delta.sort.min)) &&
+       our_distance < closest
+      closest = our_distance
+      desired = dot
+    end
   end
-  nil
+  desired.nil? ? nil : desired
 end
 
 # Array of possible locations a snake with a larger head could be next turn
