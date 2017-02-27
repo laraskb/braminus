@@ -125,13 +125,16 @@ def move_somewhere(bram, dead_space, astar, params)
   x = bram.head[0]
   y = bram.head[1]
   open_spot = []
-  possible = [[x, y + 1], [x + 1, y], [x, y - 1], [x - 1, y]].reject do |a, b|
-    a.negative? || b.negative? || a >= params['width'] || b >= params['height']
-  end
-  possible.each do |c|
+  surrounding_cells_within_grid(x, y, params).each do |c|
     next if dead_space.include?(c) # do not under any circumstances move there
     open_spot.push(c)
     return c unless path_is_deadend?(bram, [bram.head, c], astar, dead_space)
   end
   open_spot.first # all are dead-ends so just pick an open spot
+end
+
+def surrounding_cells_within_grid(x, y, params)
+  [[x, y + 1], [x + 1, y], [x, y - 1], [x - 1, y]].reject do |a, b|
+    a.negative? || b.negative? || a >= params['width'] || b >= params['height']
+  end
 end

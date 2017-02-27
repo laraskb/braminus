@@ -10,3 +10,5 @@ Metrics/MethodLength:
   Max: 13
 Metrics/AbcSize:
   Max: 18
+Metrics/BlockLength:
+  Enabled: false
