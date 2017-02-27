@@ -23,7 +23,23 @@ class Snake
     end
   end
 
+  def possible_heads
+    x = @head[0]
+    y = @head[1]
+    dx = x - @body[1][0]
+    dy = y - @body[1][1]
+    possible_moves(x, y, dx, dy)
+  end
+
   private
+
+  # Given a snakes head and body positions, where could it move
+  def possible_moves(x, y, dx, dy)
+    return [[x - 1, y], [x, y + 1], [x, y - 1]] if dx > 0
+    return [[x + 1, y], [x, y + 1], [x, y - 1]] if dx < 0
+    return [[x + 1, y], [x, y + 1], [x - 1, y]] if dy > 0
+    [[x + 1, y], [x, y - 1], [x - 1, y]]
+  end
 
   # The JSON representing the snake
   def snake(snakes, id)

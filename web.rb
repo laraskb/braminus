@@ -79,14 +79,14 @@ def closest_to_food(food, our_head, other_heads)
 end
 
 # Array of possible locations a snake with a larger head could be next turn
-def dangerous_snake_head(nodes, length, their_length)
-  their_length >= length ? possibles(nodes[0], nodes[1]) : []
+def dangerous_snake_head(bram, other_snake)
+  other_snake.length >= bram.length ? other_snake.possible_heads : []
 end
 
 def obstacles(others, bram)
   occupied = []
   others.each do |s|
-    occupied += dangerous_snake_head(s.body, bram.length, s.length)
+    occupied += dangerous_snake_head(bram, s)
     occupied += s.body.drop(1)
   end
   occupied += bram.body[0...-1]
@@ -102,22 +102,6 @@ end
 
 def distance(a, b)
   (a[0] - b[0]).abs + (a[1] - b[1]).abs
-end
-
-def possibles(snake_head, body)
-  x = snake_head[0]
-  y = snake_head[1]
-  dx = snake_head[0] - body[0]
-  dy = snake_head[1] - body[1]
-  possible_moves(x, y, dx, dy)
-end
-
-# Given a snakes head and body positions, where could it move
-def possible_moves(x, y, dx, dy)
-  return [[x - 1, y], [x, y + 1], [x, y - 1]] if dx > 0
-  return [[x + 1, y], [x, y + 1], [x, y - 1]] if dx < 0
-  return [[x + 1, y], [x, y + 1], [x - 1, y]] if dy > 0
-  [[x + 1, y], [x, y - 1], [x - 1, y]]
 end
 
 # Just don't move into a wall or box yourself in
