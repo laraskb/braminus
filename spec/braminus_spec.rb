@@ -64,4 +64,20 @@ RSpec.describe 'Braminus' do
     within_limit(post('/move', fixture(filename)))
     expect(last_response.body).to eq(expected)
   end
+
+  it 'will move to an open space if it is trapped' do
+    expected = { move: 'down' }.to_json
+    post '/start', { width: 4, height: 4, game_id: 'b1d-a112-4e0e' }.to_json
+    filename = './spec/fixtures/trapped.json'
+    within_limit(post('/move', fixture(filename)))
+    expect(last_response.body).to eq(expected)
+  end
+
+  it 'will move to an open space if it is trapped in a total way' do
+    expected = { move: 'up' }.to_json
+    post '/start', { width: 4, height: 4, game_id: 'b1d-a112-4e0e' }.to_json
+    filename = './spec/fixtures/trapped_again.json'
+    within_limit(post('/move', fixture(filename)))
+    expect(last_response.body).to eq(expected)
+  end
 end

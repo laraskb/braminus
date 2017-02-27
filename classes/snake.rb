@@ -15,7 +15,7 @@ class Snake
   # After a move, this is what the body would be
   def possible_body(path)
     if @length > path.length
-      @body[0...-1].last(@length - path.length) + path
+      path.reverse + @body.drop(1).first(@length - path.length)
     elsif @length < path.length
       path.last(@length)
     else

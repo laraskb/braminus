@@ -48,7 +48,7 @@ def next_move(bram, food, dead_space, params)
     path = nil
   end
   # Possibly need another check to make sure this doesn't deadend
-  path ? path[1] : move_somewhere(bram, dead_space, astar)
+  path ? path[1] : move_somewhere(bram, dead_space, astar, params)
 end
 
 def path_is_deadend?(bram, path, astar, dead_space)
@@ -59,7 +59,7 @@ def path_is_deadend?(bram, path, astar, dead_space)
 end
 
 def update_deadspace(actual, possible, dead_space)
-  dead_space - (actual[0...-1] - possible[0...-1])
+  (dead_space - (actual - possible))[0...-1]
 end
 
 def closest_to_food(food, our_head, other_heads)
@@ -122,12 +122,14 @@ def possible_moves(x, y, dx, dy)
 end
 
 # Just don't move into a wall or box yourself in
-def move_somewhere(bram, dead_space, astar)
+def move_somewhere(bram, dead_space, astar, params)
   x = bram.head[0]
   y = bram.head[1]
   open_spot = []
-  possible = [[x, y + 1], [x + 1, y], [x, y - 1], [x - 1, y]]
-  possible.reject { |a, b| a.negative? || b.negative? }.each do |c|
+  possible = [[x, y + 1], [x + 1, y], [x, y - 1], [x - 1, y]].reject do |a, b|
+    a.negative? || b.negative? || a >= params['width'] || b >= params['height']
+  end
+  possible.each do |c|
     next if dead_space.include?(c) # do not under any circumstances move there
     open_spot.push(c)
     return c unless path_is_deadend?(bram, [bram.head, c], astar, dead_space)
