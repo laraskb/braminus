@@ -18,9 +18,14 @@ end
 
 post '/move' do
   params = JSON.parse(request.body.read)
+  grid = Grid.new(params['width'], params['height'])
   bram = Snake.new(params['you'], params['snakes'])
   others = other_snakes(bram.id, params['snakes'])
   other_heads = others.map(&:head)
+  bodies, possible_heads = obstacles_and_possible_heads(others, bram)
+  dead_space = bodies + possible_heads
+  prey = possible_kill(bram, others, grid, dead_space)
+  return { move: delta_direction(bram.head, prey) }.to_json unless prey.nil?
   # This is where the brain should check whether one snake is getting too good
   food = closest_to_food(params['food'], bram.head, other_heads)
   move = next_move(bram, others, food, params)
@@ -28,6 +33,30 @@ post '/move' do
 end
 
 private
+
+# Check if we could move into the next head location of a snake
+# Only finds one snake at the moment!
+def possible_kill(bram, others, grid, dead_space)
+  smaller_snakes = others.find_all { |s| s.length < bram.length }
+  prey = smaller_snakes.detect { |s| distance(s.head, bram.head) == 2 }
+  return nil if prey.nil? # no suitable snakes to kill
+  astar = AStar.new(grid, dead_space)
+  tailpath = astar.search(prey.head, prey.tail) # enemy path head to tail
+  unless tailpath.nil? || !killzone?(bram, tailpath[1][0], tailpath[1][1], grid)
+    return tailpath[1]
+  end
+  # We need to cut off their "head", their tail isn't "in the picture"
+  # Try and get lucky!
+  possible = prey.possible_heads.reject do |a, b|
+    killzone?(bram, a, b, grid)
+  end
+  possible.first
+end
+
+def killzone?(bram, a, b, grid)
+  (a.negative? || b.negative? || a >= grid.width || b >= grid.height) ||
+    (distance(bram.head, [a, b]) > 1)
+end
 
 def other_snakes(our_id, snakes)
   adversaries = []
