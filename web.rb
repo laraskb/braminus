@@ -87,7 +87,7 @@ def obstacles(others, bram)
   occupied = []
   others.each do |s|
     occupied += dangerous_snake_head(bram, s)
-    occupied += s.body.drop(1)
+    occupied += s.body.drop(1)[0...-1]
   end
   occupied += bram.body[0...-1]
   occupied

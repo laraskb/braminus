@@ -80,4 +80,12 @@ RSpec.describe 'Braminus' do
     within_limit(post('/move', fixture(filename)))
     expect(last_response.body).to eq(expected)
   end
+
+  it 'knows that another snakes tail is not dead space' do
+    expected = { move: 'right' }.to_json
+    post '/start', { width: 4, height: 4, game_id: 'b1d-a112-4e0e' }.to_json
+    filename = './spec/fixtures/other_snake_tails.json'
+    within_limit(post('/move', fixture(filename)))
+    expect(last_response.body).to eq(expected)
+  end
 end
