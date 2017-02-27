@@ -20,8 +20,9 @@ post '/move' do
   params = JSON.parse(request.body.read)
   bram = Snake.new(params['you'], params['snakes'])
   others = other_snakes(bram.id, params['snakes'])
+  other_heads = others.map(&:head)
   # This is where the brain should check whether one snake is getting too good
-  dead_space, other_heads = obstacles_and_heads(others, bram)
+  dead_space = obstacles(others, bram)
   food = closest_to_food(params['food'], bram.head, other_heads)
   move = next_move(bram, food, dead_space, params)
   { move: delta_direction(bram.head, move) }.to_json
@@ -82,16 +83,14 @@ def dangerous_snake_head(nodes, length, their_length)
   their_length >= length ? possibles(nodes[0], nodes[1]) : []
 end
 
-def obstacles_and_heads(others, bram)
+def obstacles(others, bram)
   occupied = []
-  other_heads = []
   others.each do |s|
     occupied += dangerous_snake_head(s.body, bram.length, s.length)
-    other_heads.push(s.head)
     occupied += s.body.drop(1)
   end
   occupied += bram.body[0...-1]
-  [occupied, other_heads]
+  occupied
 end
 
 # Should we move UP, DOWN, LEFT, or RIGHT
