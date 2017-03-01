@@ -79,4 +79,11 @@ RSpec.describe 'Braminus' do
     within_limit(post('/move', fixture(filename)))
     expect(last_response.body).to eq(expected)
   end
+
+  it 'moves to an open space that allows it to get backs to its tail' do
+    expected = { move: 'down' }.to_json
+    filename = './spec/fixtures/move_choose_openspace_towards_tail.json'
+    within_limit(post('/move', fixture(filename)))
+    expect(last_response.body).to eq(expected)
+  end
 end
