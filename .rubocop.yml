@@ -2,13 +2,14 @@ AllCops:
   Exclude:
     - 'test_braminus.rb'
 
-Style/ClassVars:
-  Enabled: false
-
 # Not particularly proud of it, but these are necessary for now...
+Metrics/CyclomaticComplexity:
+  Enabled: false
+Metrics/PerceivedComplexity:
+  Enabled: false
 Metrics/MethodLength:
-  Max: 13
+  Max: 35
 Metrics/AbcSize:
-  Max: 18
+  Max: 35
 Metrics/BlockLength:
   Enabled: false

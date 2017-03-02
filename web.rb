@@ -22,9 +22,8 @@ post '/move' do
   others = other_snakes(bram.id, params['snakes'])
   other_heads = others.map(&:head)
   # This is where the brain should check whether one snake is getting too good
-  dead_space = obstacles(others, bram)
   food = closest_to_food(params['food'], bram.head, other_heads)
-  move = next_move(bram, food, dead_space, params)
+  move = next_move(bram, others, food, params)
   { move: delta_direction(bram.head, move) }.to_json
 end
 
@@ -38,7 +37,10 @@ def other_snakes(our_id, snakes)
   adversaries
 end
 
-def next_move(bram, food, dead_space, params)
+def next_move(bram, others, food, params)
+  bodies, possible_heads = obstacles_and_possible_heads(others, bram)
+  # We should consider possible heads dead at first
+  dead_space = bodies + possible_heads
   astar = AStar.new(Grid.new(params['width'], params['height']), dead_space)
   path = astar.search(bram.head, food)
   if path.nil?
@@ -49,7 +51,7 @@ def next_move(bram, food, dead_space, params)
     path = nil
   end
   # Possibly need another check to make sure this doesn't deadend
-  path ? path[1] : move_somewhere(bram, dead_space, astar, params)
+  path ? path[1] : best_move(bram, bodies, possible_heads, astar, params)
 end
 
 def path_is_deadend?(bram, path, astar, dead_space)
@@ -83,14 +85,16 @@ def dangerous_snake_head(bram, other_snake)
   other_snake.length >= bram.length ? other_snake.possible_heads : []
 end
 
-def obstacles(others, bram)
+# occupied is solely bodies
+def obstacles_and_possible_heads(others, bram)
   occupied = []
+  possible_heads = []
   others.each do |s|
-    occupied += dangerous_snake_head(bram, s)
+    possible_heads += dangerous_snake_head(bram, s)
     occupied += s.body.drop(1)[0...-1]
   end
   occupied += bram.body[0...-1]
-  occupied
+  [occupied, possible_heads]
 end
 
 # Should we move UP, DOWN, LEFT, or RIGHT
@@ -105,16 +109,27 @@ def distance(a, b)
 end
 
 # Just don't move into a wall or box yourself in
-def move_somewhere(bram, dead_space, astar, params)
+def best_move(bram, bodies, possible_heads, astar, params)
+  dead_space = bodies + possible_heads
   x = bram.head[0]
   y = bram.head[1]
   open_spot = []
+  open_possible_head = [] # These are possibly open, and our second best choice
+  path_back_to_tail = []
   surrounding_cells_within_grid(x, y, params).each do |c|
-    next if dead_space.include?(c) # do not under any circumstances move there
-    open_spot.push(c)
-    return c unless path_is_deadend?(bram, [bram.head, c], astar, dead_space)
+    next if bodies.include?(c) # do not under any circumstances move there
+    possible_heads.include?(c) ? open_possible_head.push(c) : open_spot.push(c)
+    unless path_is_deadend?(bram, [bram.head, c], astar, dead_space)
+      path_back_to_tail.push(c)
+    end
+    # If it's open and opens a path back to the tail take it
+    return c if open_spot.include?(c) && path_back_to_tail.include?(c)
   end
-  open_spot.first # all are dead-ends so just pick an open spot
+  if open_spot.empty?
+    open_possible_head.first
+  else
+    open_spot.first # all are dead-ends so just pick an open spot
+  end
 end
 
 def surrounding_cells_within_grid(x, y, params)

@@ -86,4 +86,11 @@ RSpec.describe 'Braminus' do
     within_limit(post('/move', fixture(filename)))
     expect(last_response.body).to eq(expected)
   end
+
+  it 'when no path to tail will favour a move into a possible head, not body' do
+    expected = { move: 'left' }.to_json
+    filename = './spec/fixtures/favour_possible_head_over_body.json'
+    within_limit(post('/move', fixture(filename)))
+    expect(last_response.body).to eq(expected)
+  end
 end
