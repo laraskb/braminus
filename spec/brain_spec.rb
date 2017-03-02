@@ -2,7 +2,7 @@ require 'spec_helper'
 require_relative '../classes/brain'
 require 'json'
 
-describe "Braminus' Brain" do
+describe 'Brain' do
   it 'reports the length of adversaries' do
     snakes = fixture('./spec/fixtures/snake_lengths.json')
     lengths = Brain.new.snake_lengths(JSON.parse(snakes)['snakes'])

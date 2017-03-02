@@ -2,7 +2,7 @@ require 'spec_helper'
 require_relative '../classes/grid'
 require_relative '../classes/a_star'
 
-describe 'A* algorithm' do
+describe 'A* Algorithm' do
   it 'finds a simple path with no obstacles' do
     final_path = [[1, 0], [1, 1], [1, 2]]
     grid = Grid.new(4, 4)
