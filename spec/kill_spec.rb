@@ -39,5 +39,13 @@ RSpec.describe 'Head Attacks' do
       within_limit(post('/move', fixture(filename)))
       expect(last_response.body).to eq(expected)
     end
+
+    it 'chooses head attack when enemy head is 3 spaces from tail' do
+      # There is also food nearby
+      expected = { move: 'right' }.to_json
+      filename = './spec/fixtures/basic_attack_three_extra.json'
+      within_limit(post('/move', fixture(filename)))
+      expect(last_response.body).to eq(expected)
+    end
   end
 end

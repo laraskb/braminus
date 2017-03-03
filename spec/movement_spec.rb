@@ -25,6 +25,20 @@ RSpec.describe 'Movement' do
       within_limit(post('/move', fixture(filename)))
       expect(last_response.body).to eq(expected)
     end
+
+    it 'goes for food equidistant to her and a smaller snake' do
+      expected = { move: 'right' }.to_json
+      filename = './spec/fixtures/equidistant_to_food_with_short_snake.json'
+      within_limit(post('/move', fixture(filename)))
+      expect(last_response.body).to eq(expected)
+    end
+
+    it 'does not bother going for food if equidistant longer snake' do
+      expected = { move: 'up' }.to_json
+      filename = './spec/fixtures/equidistant_to_food_with_long_snake.json'
+      within_limit(post('/move', fixture(filename)))
+      expect(last_response.body).to eq(expected)
+    end
   end
 
   context 'updating and dealing with dead-space concerns' do
@@ -93,6 +107,22 @@ RSpec.describe 'Movement' do
     it 'does not move into their body' do
       expected = { move: 'right' }.to_json
       filename = './spec/fixtures/beside_snake.json'
+      within_limit(post('/move', fixture(filename)))
+      expect(last_response.body).to eq(expected)
+    end
+
+    it 'do not go for an attack on a bigger snake, brams' do
+      expected = { move: 'down' }.to_json
+      filename = './spec/fixtures/should_not_head_attack.json'
+      within_limit(post('/move', fixture(filename)))
+      expect(last_response.body).to eq(expected)
+    end
+  end
+
+  context 'does braminus need glasses? If she fails this test, then yes' do
+    it 'does not move off the map, and instead moves into her tail' do
+      expected = { move: 'up' }.to_json
+      filename = './spec/fixtures/head_in_corner.json'
       within_limit(post('/move', fixture(filename)))
       expect(last_response.body).to eq(expected)
     end
