@@ -88,4 +88,13 @@ RSpec.describe 'Movement' do
       expect(last_response.body).to eq(expected)
     end
   end
+
+  context 'when right beside an enemy snake' do
+    it 'does not move into their body' do
+      expected = { move: 'right' }.to_json
+      filename = './spec/fixtures/beside_snake.json'
+      within_limit(post('/move', fixture(filename)))
+      expect(last_response.body).to eq(expected)
+    end
+  end
 end
