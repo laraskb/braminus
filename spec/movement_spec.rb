@@ -101,6 +101,13 @@ RSpec.describe 'Movement' do
       within_limit(post('/move', fixture(filename)))
       expect(last_response.body).to eq(expected)
     end
+    
+    it 'does not move at food if another longer snake will go there' do
+      expected = { move: 'down' }.to_json
+      filename = './spec/fixtures/lara_test1.json'
+      within_limit(post('/move', fixture(filename)))
+      expect(last_response.body).to eq(expected)
+    end
   end
 
   context 'when right beside an enemy snake' do
