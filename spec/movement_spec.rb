@@ -122,6 +122,13 @@ RSpec.describe 'Movement' do
       within_limit(post('/move', fixture(filename)))
       expect(last_response.body).to eq(expected)
     end
+    
+     it 'finds best space filling to not get boxed in P3' do
+      expected = { move: 'up' }.to_json
+      filename = './spec/fixtures/boxed_in_p3.json'
+      within_limit(post('/move', fixture(filename)))
+      expect(last_response.body).to eq(expected)
+    end
   end
 
   context 'when right beside an enemy snake' do
