@@ -27,7 +27,7 @@ post '/move' do
   return { move: delta_direction(bram.head, prey) }.to_json unless prey.nil?
   # This is where the brain should check whether one snake is getting too good
   food = closest_to_food(params['food'], bram.head, other_heads)
-  move = next_move(bram, others, food, params)
+  move = next_move(bram, others, food, params, bodies, possible_heads)
   { move: delta_direction(bram.head, move) }.to_json
 end
 
@@ -65,8 +65,7 @@ def other_snakes(our_id, snakes)
   adversaries
 end
 
-def next_move(bram, others, food, params)
-  bodies, possible_heads = obstacles_and_possible_heads(others, bram)
+def next_move(bram, others, food, params, bodies, possible_heads)
   # We should consider possible heads dead at first
   dead_space = bodies + possible_heads
   astar = AStar.new(Grid.new(params['width'], params['height']), dead_space)
