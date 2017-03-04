@@ -1,7 +1,6 @@
 require 'sinatra'
 require 'json'
 require_relative './classes/grid'
-require_relative './classes/brain'
 require_relative './classes/snake'
 require_relative './classes/a_star'
 
