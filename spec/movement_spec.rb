@@ -117,7 +117,7 @@ RSpec.describe 'Movement' do
     end
     
     it 'finds best space filling to not get boxed in P2' do
-      expected = { move: 'up' }.to_json
+      expected = { move: 'left' }.to_json
       filename = './spec/fixtures/boxed_in_p2.json'
       within_limit(post('/move', fixture(filename)))
       expect(last_response.body).to eq(expected)
