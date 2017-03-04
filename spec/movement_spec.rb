@@ -108,6 +108,20 @@ RSpec.describe 'Movement' do
       within_limit(post('/move', fixture(filename)))
       expect(last_response.body).to eq(expected)
     end
+    
+     it 'finds best space filling to not get boxed in P1' do
+      expected = { move: 'up' }.to_json
+      filename = './spec/fixtures/boxed_in_p1.json'
+      within_limit(post('/move', fixture(filename)))
+      expect(last_response.body).to eq(expected)
+    end
+    
+    it 'finds best space filling to not get boxed in P2' do
+      expected = { move: 'up' }.to_json
+      filename = './spec/fixtures/boxed_in_p2.json'
+      within_limit(post('/move', fixture(filename)))
+      expect(last_response.body).to eq(expected)
+    end
   end
 
   context 'when right beside an enemy snake' do
@@ -124,6 +138,14 @@ RSpec.describe 'Movement' do
       within_limit(post('/move', fixture(filename)))
       expect(last_response.body).to eq(expected)
     end
+    
+    it 'do not follow your tail if a bigger snake is going there' do
+      expected = { move: 'down' }.to_json
+      filename = './spec/fixtures/2_spots_for_longer_snake_head.json'
+      within_limit(post('/move', fixture(filename)))
+      expect(last_response.body).to eq(expected)
+    end
+      
   end
 
   context 'does braminus need glasses? If she fails this test, then yes' do
